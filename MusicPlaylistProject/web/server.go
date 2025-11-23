@@ -1,3 +1,4 @@
+// Package web is the webserver implementation
 package web
 
 import (
@@ -9,23 +10,19 @@ import (
 	"time"
 )
 
-// Server represents the web server
-type Server struct {
+type WebServer struct {
 	manager *manager.PlaylistManager
 	port    string
 }
 
-// NewServer creates a new web server instance
-func NewServer(mgr *manager.PlaylistManager, port string) *Server {
-	return &Server{
+func CreateServer(mgr *manager.PlaylistManager, port string) *WebServer {
+	return &WebServer{
 		manager: mgr,
 		port:    port,
 	}
 }
 
-// Start starts the web server
-func (s *Server) Start() error {
-	// Serve static files
+func (s *WebServer) Start() error {
 	fs := http.FileServer(http.Dir("web/static"))
 	http.Handle("/", fs)
 
@@ -39,15 +36,13 @@ func (s *Server) Start() error {
 	http.HandleFunc("/api/playlists/shuffle", s.handleShufflePlaylist)
 	http.HandleFunc("/api/statistics", s.handleStatistics)
 
-	fmt.Printf("🌐 Web server starting at http://localhost%s\n", s.port)
-	fmt.Println("📱 Open your browser and visit: http://localhost" + s.port)
+	fmt.Printf("Web server starting at http://localhost%s\n", s.port)
 	fmt.Println("Press Ctrl+C to stop the server")
-	
+
 	return http.ListenAndServe(s.port, nil)
 }
 
-// handlePlaylists returns all playlists
-func (s *Server) handlePlaylists(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) handlePlaylists(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -57,8 +52,7 @@ func (s *Server) handlePlaylists(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, playlists)
 }
 
-// handleCreatePlaylist creates a new playlist
-func (s *Server) handleCreatePlaylist(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) handleCreatePlaylist(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -75,8 +69,7 @@ func (s *Server) handleCreatePlaylist(w http.ResponseWriter, r *http.Request) {
 	}
 
 	playlist := s.manager.CreatePlaylist(req.Name, req.Description)
-	
-	// Save after creating
+
 	if err := s.manager.Save(); err != nil {
 		http.Error(w, "Failed to save: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -85,8 +78,7 @@ func (s *Server) handleCreatePlaylist(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, playlist)
 }
 
-// handleDeletePlaylist deletes a playlist
-func (s *Server) handleDeletePlaylist(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) handleDeletePlaylist(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -106,7 +98,6 @@ func (s *Server) handleDeletePlaylist(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Save after deleting
 	if err := s.manager.Save(); err != nil {
 		http.Error(w, "Failed to save: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -115,8 +106,7 @@ func (s *Server) handleDeletePlaylist(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, map[string]string{"status": "success"})
 }
 
-// handleAddSong adds a song to a playlist
-func (s *Server) handleAddSong(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) handleAddSong(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -163,8 +153,7 @@ func (s *Server) handleAddSong(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, song)
 }
 
-// handleRemoveSong removes a song from a playlist
-func (s *Server) handleRemoveSong(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) handleRemoveSong(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -200,8 +189,7 @@ func (s *Server) handleRemoveSong(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, map[string]string{"status": "success"})
 }
 
-// handleSearchSongs searches for songs
-func (s *Server) handleSearchSongs(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) handleSearchSongs(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -217,8 +205,7 @@ func (s *Server) handleSearchSongs(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, results)
 }
 
-// handleShufflePlaylist shuffles a playlist
-func (s *Server) handleShufflePlaylist(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) handleShufflePlaylist(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -241,7 +228,6 @@ func (s *Server) handleShufflePlaylist(w http.ResponseWriter, r *http.Request) {
 
 	playlist.Shuffle()
 
-	// Save after shuffling
 	if err := s.manager.Save(); err != nil {
 		http.Error(w, "Failed to save: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -250,8 +236,7 @@ func (s *Server) handleShufflePlaylist(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, playlist)
 }
 
-// handleStatistics returns statistics
-func (s *Server) handleStatistics(w http.ResponseWriter, r *http.Request) {
+func (s *WebServer) handleStatistics(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -261,9 +246,10 @@ func (s *Server) handleStatistics(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, stats)
 }
 
-// respondJSON sends a JSON response
-func respondJSON(w http.ResponseWriter, data interface{}) {
+func respondJSON(w http.ResponseWriter, data any) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
+	err := json.NewEncoder(w).Encode(data)
+	if err != nil {
+		println("Error Encoding JSON")
+	}
 }
-

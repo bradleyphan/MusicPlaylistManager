@@ -1,3 +1,4 @@
+// Package manager is the playlist manager
 package manager
 
 import (
@@ -10,22 +11,19 @@ import (
 	"time"
 )
 
-// PlaylistManager manages all playlists and provides operations
 type PlaylistManager struct {
 	playlists []*models.Playlist
 	storage   storage.Storage
-	mu        sync.RWMutex // Demonstrates Go's concurrency primitives
+	mu        sync.RWMutex
 }
 
-// NewPlaylistManager creates a new playlist manager
-func NewPlaylistManager(store storage.Storage) *PlaylistManager {
+func CreatePlaylistManager(store storage.Storage) *PlaylistManager {
 	return &PlaylistManager{
 		playlists: make([]*models.Playlist, 0),
 		storage:   store,
 	}
 }
 
-// Load loads playlists from storage
 func (pm *PlaylistManager) Load() error {
 	pm.mu.Lock()
 	defer pm.mu.Unlock()
@@ -39,7 +37,6 @@ func (pm *PlaylistManager) Load() error {
 	return nil
 }
 
-// Save saves playlists to storage
 func (pm *PlaylistManager) Save() error {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
@@ -47,7 +44,6 @@ func (pm *PlaylistManager) Save() error {
 	return pm.storage.SavePlaylists(pm.playlists)
 }
 
-// CreatePlaylist creates a new playlist
 func (pm *PlaylistManager) CreatePlaylist(name, description string) *models.Playlist {
 	pm.mu.Lock()
 	defer pm.mu.Unlock()
@@ -57,7 +53,6 @@ func (pm *PlaylistManager) CreatePlaylist(name, description string) *models.Play
 	return playlist
 }
 
-// GetPlaylist retrieves a playlist by ID
 func (pm *PlaylistManager) GetPlaylist(id string) (*models.Playlist, error) {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
@@ -70,7 +65,6 @@ func (pm *PlaylistManager) GetPlaylist(id string) (*models.Playlist, error) {
 	return nil, errors.New("playlist not found")
 }
 
-// DeletePlaylist deletes a playlist by ID
 func (pm *PlaylistManager) DeletePlaylist(id string) error {
 	pm.mu.Lock()
 	defer pm.mu.Unlock()
@@ -84,7 +78,6 @@ func (pm *PlaylistManager) DeletePlaylist(id string) error {
 	return errors.New("playlist not found")
 }
 
-// ListPlaylists returns all playlists
 func (pm *PlaylistManager) ListPlaylists() []*models.Playlist {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
@@ -95,8 +88,6 @@ func (pm *PlaylistManager) ListPlaylists() []*models.Playlist {
 	return result
 }
 
-// SearchSongs searches for songs across all playlists
-// This demonstrates concurrent search using goroutines and channels
 func (pm *PlaylistManager) SearchSongs(query string) []*SearchResult {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
@@ -106,7 +97,7 @@ func (pm *PlaylistManager) SearchSongs(query string) []*SearchResult {
 	resultChan := make(chan *SearchResult, 100)
 	var wg sync.WaitGroup
 
-	// Search each playlist concurrently
+	//Use goroutunes to search playlists concurrently
 	for _, playlist := range pm.playlists {
 		wg.Add(1)
 		go func(p *models.Playlist) {
@@ -129,7 +120,6 @@ func (pm *PlaylistManager) SearchSongs(query string) []*SearchResult {
 		close(resultChan)
 	}()
 
-	// Collect results
 	for result := range resultChan {
 		results = append(results, result)
 	}
@@ -137,19 +127,16 @@ func (pm *PlaylistManager) SearchSongs(query string) []*SearchResult {
 	return results
 }
 
-// SearchResult represents a search result
 type SearchResult struct {
 	Song         *models.Song
 	PlaylistName string
 	PlaylistID   string
 }
 
-// String formats the search result
 func (sr *SearchResult) String() string {
-	return fmt.Sprintf("%s (in playlist: %s)", sr.Song.String(), sr.PlaylistName)
+	return fmt.Sprintf("%s (in playlist: %s)", sr.Song.ToString(), sr.PlaylistName)
 }
 
-// matchesSong checks if a song matches the search query
 func matchesSong(song *models.Song, query string) bool {
 	return strings.Contains(strings.ToLower(song.Title), query) ||
 		strings.Contains(strings.ToLower(song.Artist), query) ||
@@ -157,7 +144,6 @@ func matchesSong(song *models.Song, query string) bool {
 		strings.Contains(strings.ToLower(song.Genre), query)
 }
 
-// GetStatistics returns statistics about all playlists
 func (pm *PlaylistManager) GetStatistics() Statistics {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
@@ -181,7 +167,6 @@ func (pm *PlaylistManager) GetStatistics() Statistics {
 	return stats
 }
 
-// Statistics contains aggregate statistics
 type Statistics struct {
 	TotalPlaylists int
 	TotalSongs     int
@@ -189,4 +174,3 @@ type Statistics struct {
 	GenreCounts    map[string]int
 	ArtistCounts   map[string]int
 }
-

@@ -2,7 +2,6 @@
 let currentPlaylistId = null;
 let playlists = [];
 
-// Initialize app
 document.addEventListener('DOMContentLoaded', function() {
     loadPlaylists();
     loadStatistics();
@@ -14,7 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 5000);
 });
 
-// Load all playlists
 async function loadPlaylists() {
     try {
         const response = await fetch('/api/playlists');
@@ -33,7 +31,6 @@ async function loadPlaylists() {
     }
 }
 
-// Load statistics
 async function loadStatistics() {
     try {
         const response = await fetch('/api/statistics');
@@ -42,7 +39,6 @@ async function loadStatistics() {
         document.getElementById('totalPlaylists').textContent = stats.TotalPlaylists || 0;
         document.getElementById('totalSongs').textContent = stats.TotalSongs || 0;
         
-        // Format duration
         const duration = stats.TotalDuration || 0;
         const minutes = Math.floor(duration / 60000000000);
         document.getElementById('totalDuration').textContent = minutes + 'm';
@@ -51,7 +47,6 @@ async function loadStatistics() {
     }
 }
 
-// Render playlists
 function renderPlaylists() {
     const container = document.getElementById('playlistsList');
     
@@ -72,7 +67,6 @@ function renderPlaylists() {
     `).join('');
 }
 
-// Select a playlist
 function selectPlaylist(playlistId) {
     currentPlaylistId = playlistId;
     const playlist = playlists.find(p => p.id === playlistId);
@@ -83,7 +77,6 @@ function selectPlaylist(playlistId) {
     }
 }
 
-// Render songs
 function renderSongs(playlist) {
     const container = document.getElementById('songsList');
     const titleElement = document.getElementById('playlistTitle');
@@ -113,7 +106,6 @@ function renderSongs(playlist) {
     `).join('');
 }
 
-// Create playlist
 async function createPlaylist(event) {
     event.preventDefault();
     
@@ -139,7 +131,6 @@ async function createPlaylist(event) {
     }
 }
 
-// Add song
 async function addSong(event) {
     event.preventDefault();
     
@@ -178,7 +169,6 @@ async function addSong(event) {
     }
 }
 
-// Remove song
 async function removeSong(songId) {
     if (!confirm('Remove this song?')) return;
     
@@ -201,7 +191,6 @@ async function removeSong(songId) {
     }
 }
 
-// Delete playlist
 async function deletePlaylist() {
     if (!currentPlaylistId) return;
     
@@ -227,7 +216,6 @@ async function deletePlaylist() {
     }
 }
 
-// Shuffle playlist
 async function shufflePlaylist() {
     if (!currentPlaylistId) return;
     
@@ -246,7 +234,6 @@ async function shufflePlaylist() {
     }
 }
 
-// Search songs
 async function searchSongs() {
     const query = document.getElementById('searchInput').value.trim();
     
@@ -266,7 +253,6 @@ async function searchSongs() {
     }
 }
 
-// Show search results
 function showSearchResults(results) {
     const modal = document.getElementById('searchResultsModal');
     const container = document.getElementById('searchResults');
@@ -309,7 +295,6 @@ window.onclick = function(event) {
     }
 }
 
-// Utility functions
 function formatDuration(duration) {
     const seconds = Math.floor(duration / 1000000000);
     const minutes = Math.floor(seconds / 60);

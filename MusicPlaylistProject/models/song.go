@@ -1,3 +1,4 @@
+// Json models for a song
 package models
 
 import (
@@ -5,7 +6,6 @@ import (
 	"time"
 )
 
-// Song represents a music track with metadata
 type Song struct {
 	ID       string        `json:"id"`
 	Title    string        `json:"title"`
@@ -16,7 +16,6 @@ type Song struct {
 	Year     int           `json:"year"`
 }
 
-// NewSong creates a new song with a generated ID
 func NewSong(title, artist, album string, duration time.Duration, genre string, year int) *Song {
 	return &Song{
 		ID:       generateID(),
@@ -29,21 +28,17 @@ func NewSong(title, artist, album string, duration time.Duration, genre string, 
 	}
 }
 
-// String returns a formatted string representation of the song
-func (s *Song) String() string {
+func (s *Song) ToString() string {
 	return fmt.Sprintf("[%s] %s - %s (%s) [%s] - %s",
 		s.ID, s.Title, s.Artist, s.Album, s.Genre, formatDuration(s.Duration))
 }
 
-// formatDuration converts duration to MM:SS format
 func formatDuration(d time.Duration) string {
 	minutes := int(d.Minutes())
 	seconds := int(d.Seconds()) % 60
 	return fmt.Sprintf("%d:%02d", minutes, seconds)
 }
 
-// generateID generates a simple unique ID (timestamp-based)
 func generateID() string {
 	return fmt.Sprintf("S%d", time.Now().UnixNano())
 }
-

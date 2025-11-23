@@ -6,7 +6,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     min-height: 100vh;
     padding: 20px;
 }
@@ -25,7 +25,6 @@ header {
 header h1 {
     font-size: 3em;
     margin-bottom: 10px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .subtitle {
@@ -33,7 +32,6 @@ header h1 {
     opacity: 0.9;
 }
 
-/* Statistics Panel */
 .stats-panel {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -50,10 +48,6 @@ header h1 {
     transition: transform 0.3s ease;
 }
 
-.stat-card:hover {
-    transform: translateY(-5px);
-}
-
 .stat-value {
     font-size: 2.5em;
     font-weight: bold;
@@ -68,7 +62,6 @@ header h1 {
     letter-spacing: 1px;
 }
 
-/* Main Content */
 .content {
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -99,7 +92,6 @@ header h1 {
     font-size: 1.5em;
 }
 
-/* Buttons */
 .btn {
     padding: 10px 20px;
     border: none;
@@ -139,7 +131,6 @@ header h1 {
     background: #e53e3e;
 }
 
-/* Search Box */
 .search-box {
     margin-bottom: 20px;
 }
@@ -242,7 +233,6 @@ header h1 {
     background: #e53e3e;
 }
 
-/* Empty State */
 .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -260,7 +250,6 @@ header h1 {
     font-size: 1.1em;
 }
 
-/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -318,7 +307,6 @@ header h1 {
     color: #333;
 }
 
-/* Forms */
 .form-group {
     margin-bottom: 20px;
 }
