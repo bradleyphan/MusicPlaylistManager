@@ -3,11 +3,16 @@ package models
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
+
+	"github.com/dhowden/tag"
 )
 
 type Song struct {
 	ID       string        `json:"id"`
+	FilePath string        `json:"filePath"`
 	Title    string        `json:"title"`
 	Artist   string        `json:"artist"`
 	Album    string        `json:"album"`
@@ -16,21 +21,41 @@ type Song struct {
 	Year     int           `json:"year"`
 }
 
-func NewSong(title, artist, album string, duration time.Duration, genre string, year int) *Song {
+func NewSongFromPath(path string, duration time.Duration) (*Song, error) {
+	file, err := os.Open(path)
+
+	if err != nil {
+		return &Song{}, err
+	}
+	defer file.Close()
+
+	metadata, err := tag.ReadFrom(file)
+
+	if err != nil {
+		return &Song{}, err
+	}
+
+	title := metadata.Title()
+
+	if title == "" {
+		title = filepath.Base(path)
+	}
+
 	return &Song{
 		ID:       generateID(),
 		Title:    title,
-		Artist:   artist,
-		Album:    album,
+		Artist:   metadata.Artist(),
+		Album:    metadata.Album(),
+		FilePath: path,
+		Genre:    metadata.Genre(),
+		Year:     metadata.Year(),
 		Duration: duration,
-		Genre:    genre,
-		Year:     year,
-	}
+	}, nil
+
 }
 
 func (s *Song) ToString() string {
-	return fmt.Sprintf("[%s] %s - %s (%s) [%s] - %s",
-		s.ID, s.Title, s.Artist, s.Album, s.Genre, formatDuration(s.Duration))
+	return fmt.Sprintf("[%s] %s - %s (%s) [%s] - %s", s.ID, s.Title, s.Artist, s.Album, s.Genre, formatDuration(s.Duration))
 }
 
 func formatDuration(d time.Duration) string {

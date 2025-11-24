@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"musicplaylist/manager"
 	"musicplaylist/models"
+	"musicplaylist/scanner"
 	"os"
 	"strconv"
 	"strings"
@@ -42,14 +43,16 @@ func (c *CLI) Run() {
 		case "4":
 			c.addSongToPlaylist()
 		case "5":
-			c.removeSongFromPlaylist()
+			c.addFolderToPlaylist()
 		case "6":
-			c.searchSongs()
+			c.removeSongFromPlaylist()
 		case "7":
-			c.shufflePlaylist()
+			c.searchSongs()
 		case "8":
-			c.deletePlaylist()
+			c.shufflePlaylist()
 		case "9":
+			c.deletePlaylist()
+		case "10":
 			c.showStatistics()
 		case "0":
 			c.exit()
@@ -67,11 +70,12 @@ func (c *CLI) showMainMenu() {
 	fmt.Println("2. List Playlists")
 	fmt.Println("3. View Playlist Details")
 	fmt.Println("4. Add Song to Playlist")
-	fmt.Println("5. Remove Song from Playlist")
-	fmt.Println("6. Search Songs")
-	fmt.Println("7. Shuffle Playlist")
-	fmt.Println("8. Delete Playlist")
-	fmt.Println("9. Show Statistics")
+	fmt.Println("5. Add Folder to Playlist")
+	fmt.Println("6. Remove Song from Playlist")
+	fmt.Println("7. Search Songs")
+	fmt.Println("8. Shuffle Playlist")
+	fmt.Println("9. Delete Playlist")
+	fmt.Println("10. Show Statistics")
 	fmt.Println("0. Exit")
 }
 
@@ -141,6 +145,37 @@ func (c *CLI) viewPlaylist() {
 	}
 }
 
+func (c *CLI) addFolderToPlaylist() {
+
+	playlists := c.manager.ListPlaylists()
+	if len(playlists) == 0 {
+		fmt.Println("\nNo playlists available.")
+		return
+	}
+
+	c.listPlaylists()
+	playlistID := c.readInput("\nEnter playlist ID: ")
+
+	playlist, err := c.manager.GetPlaylist(playlistID)
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+
+	fmt.Println("\nSCAN FOLDER")
+	path := c.readInput("Enter the path of the folder you want to scan: ")
+	songs, err := scanner.ScanMusicFolder(path)
+
+	if err != nil {
+		fmt.Printf("Error scanning foler: %v\n", err)
+		return
+	}
+
+	playlist.AddSongs(songs)
+
+	fmt.Printf("Added %d songs \n", len(songs))
+}
+
 func (c *CLI) addSongToPlaylist() {
 	playlists := c.manager.ListPlaylists()
 	if len(playlists) == 0 {
@@ -158,33 +193,23 @@ func (c *CLI) addSongToPlaylist() {
 	}
 
 	fmt.Println("\nADD SONG")
-	title := c.readInput("Title: ")
-	if title == "" {
-		fmt.Println("Title cannot be empty.")
-		return
-	}
-
-	artist := c.readInput("Artist: ")
-	album := c.readInput("Album: ")
-	genre := c.readInput("Genre: ")
-
-	durationStr := c.readInput("Duration (MM:SS): ")
-	duration, err := parseDuration(durationStr)
+	path := c.readInput("Enter the path of the file: ")
+	durationString := c.readInput("Enter the duration in seconds: ")
+	duration, err := parseDuration(durationString)
 	if err != nil {
-		fmt.Printf("Invalid duration format: %v\n", err)
-		return
+		duration = time.Duration(180) * time.Second
 	}
+	song, err := models.NewSongFromPath(path, duration)
 
-	yearStr := c.readInput("Year: ")
-	year, err := strconv.Atoi(yearStr)
 	if err != nil {
-		year = time.Now().Year()
+		fmt.Printf("Error adding song: %v\n", err)
+
+	} else {
+		playlist.AddSong(song)
+
+		fmt.Printf("Added song: %s\n", song.ToString())
 	}
 
-	song := models.NewSong(title, artist, album, duration, genre, year)
-	playlist.AddSong(song)
-
-	fmt.Printf("Added song: %s\n", song.ToString())
 }
 
 func (c *CLI) removeSongFromPlaylist() {

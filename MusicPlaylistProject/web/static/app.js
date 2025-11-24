@@ -141,12 +141,8 @@ async function addSong(event) {
     
     const song = {
         playlist_id: currentPlaylistId,
-        title: document.getElementById('songTitle').value,
-        artist: document.getElementById('songArtist').value,
-        album: document.getElementById('songAlbum').value,
+        file_path: document.getElementById('filePath').value,
         duration: parseInt(document.getElementById('songDuration').value),
-        genre: document.getElementById('songGenre').value,
-        year: parseInt(document.getElementById('songYear').value)
     };
     
     try {
@@ -158,14 +154,47 @@ async function addSong(event) {
         
         if (response.ok) {
             closeModal('addSongModal');
-            document.getElementById('songTitle').value = '';
-            document.getElementById('songArtist').value = '';
-            document.getElementById('songAlbum').value = '';
+
+            document.getElementById('filePath').value = '';
             loadPlaylists();
             loadStatistics();
+        }else{
+            alert("Error adding song")
         }
     } catch (error) {
         alert('Error adding song: ' + error.message);
+    }
+}
+async function scanFolder(event) {
+    event.preventDefault();
+    
+    if (!currentPlaylistId) {
+        alert('Please select a playlist first');
+        return;
+    }
+    
+    const folder = {
+        playlist_id: currentPlaylistId,
+        file_path: document.getElementById('folderPath').value,
+    };
+    
+    try {
+        const response = await fetch('/api/songs/scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(folder)
+        });
+        
+        if (response.ok) {
+            closeModal('scanFolderModal');
+            document.getElementById('filePath').value = '';
+            loadPlaylists();
+            loadStatistics();
+        }else{
+            alert("Error scanning folder")
+        }
+    } catch (error) {
+        alert('Error : ' + error.message);
     }
 }
 
@@ -282,6 +311,14 @@ function showAddSongModal() {
         return;
     }
     document.getElementById('addSongModal').style.display = 'block';
+}
+
+function showScanFolderModal() {
+    if (!currentPlaylistId) {
+        alert('Please select a playlist first');
+        return;
+    }
+    document.getElementById('scanFolderModal').style.display = 'block';
 }
 
 function closeModal(modalId) {

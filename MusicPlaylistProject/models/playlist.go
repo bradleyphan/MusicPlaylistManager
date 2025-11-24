@@ -28,6 +28,11 @@ func NewPlaylist(name, description string) *Playlist {
 	}
 }
 
+func (p *Playlist) AddSongs(songs []*Song) {
+	p.Songs = append(p.Songs, songs...)
+	p.UpdatedAt = time.Now()
+}
+
 func (p *Playlist) AddSong(song *Song) {
 	p.Songs = append(p.Songs, song)
 	p.UpdatedAt = time.Now()

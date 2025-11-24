@@ -49,6 +49,7 @@
                     <div id="playlistActions" style="display: none;">
                         <button class="btn btn-secondary" onclick="shufflePlaylist()">Shuffle</button>
                         <button class="btn btn-primary" onclick="showAddSongModal()">Add Song</button>
+                        <button class="btn btn-primary" onclick="showScanFolderModal()">Scan Folder</button>
                         <button class="btn btn-danger" onclick="deletePlaylist()">Delete</button>
                     </div>
                 </div>
@@ -85,45 +86,37 @@
             <h2>Add Song</h2>
             <form onsubmit="addSong(event)">
                 <div class="form-group">
-                    <label>Title</label>
-                    <input type="text" id="songTitle" required>
-                </div>
-                <div class="form-group">
-                    <label>Artist</label>
-                    <input type="text" id="songArtist" required>
-                </div>
-                <div class="form-group">
-                    <label>Album</label>
-                    <input type="text" id="songAlbum">
+                    <label>File Path</label>
+                    <input type="text" id="filePath">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Duration (seconds)</label>
                         <input type="number" id="songDuration" value="180" required>
                     </div>
-                    <div class="form-group">
-                        <label>Year</label>
-                        <input type="number" id="songYear" value="2024">
-                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Genre</label>
-                    <select id="songGenre">
-                        <option>Rock</option>
-                        <option>Pop</option>
-                        <option>Jazz</option>
-                        <option>Classical</option>
-                        <option>Hip Hop</option>
-                        <option>Electronic</option>
-                        <option>Country</option>
-                        <option>R&B</option>
-                        <option>Other</option>
-                    </select>
-                </div>
+
                 <button type="submit" class="btn btn-primary">Add Song</button>
             </form>
         </div>
     </div>
+
+    <div id="scanFolderModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('scanFolderModal')">&times;</span>
+            <h2>Scan Folder</h2>
+            <form onsubmit="scanFolder(event)">
+                <div class="form-group">
+                    <label>File Path</label>
+                    <input type="text" id="folderPath">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Scan Folder</button>
+            </form>
+        </div>
+    </div>
+
+
 
     <div id="searchResultsModal" class="modal">
         <div class="modal-content">

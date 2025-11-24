@@ -95,13 +95,13 @@ func (pm *PlaylistManager) SearchSongs(query string) []*SearchResult {
 	query = strings.ToLower(query)
 	results := make([]*SearchResult, 0)
 	resultChan := make(chan *SearchResult, 100)
-	var wg sync.WaitGroup
+	var waitGroup sync.WaitGroup
 
-	//Use goroutunes to search playlists concurrently
+	//Use goroutines to search playlists concurrently
 	for _, playlist := range pm.playlists {
-		wg.Add(1)
+		waitGroup.Add(1)
 		go func(p *models.Playlist) {
-			defer wg.Done()
+			defer waitGroup.Done()
 			for _, song := range p.Songs {
 				if matchesSong(song, query) {
 					resultChan <- &SearchResult{
@@ -116,7 +116,7 @@ func (pm *PlaylistManager) SearchSongs(query string) []*SearchResult {
 
 	// Close channel when all goroutines complete
 	go func() {
-		wg.Wait()
+		waitGroup.Wait()
 		close(resultChan)
 	}()
 

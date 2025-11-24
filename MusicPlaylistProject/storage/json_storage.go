@@ -12,12 +12,6 @@ type JSONStorage struct {
 	filepath string
 }
 
-func NewJSONStorage(filepath string) *JSONStorage {
-	return &JSONStorage{
-		filepath: filepath,
-	}
-}
-
 func (js *JSONStorage) SavePlaylists(playlists []*models.Playlist) error {
 	data, err := json.MarshalIndent(playlists, "", "  ")
 	if err != nil {
@@ -49,4 +43,10 @@ func (js *JSONStorage) LoadPlaylists() ([]*models.Playlist, error) {
 	}
 
 	return playlists, nil
+}
+
+func NewJSONStorage(filepath string) *JSONStorage {
+	return &JSONStorage{
+		filepath: filepath,
+	}
 }
